@@ -29,6 +29,7 @@ def dataConf(fileName):
         # dataBatch.drop(index=dataBatch.index[0], axis=0, inplace=True)
         plot(dataBatch, YNCombinedModules)
 
+# outputting plots and creating axis data
 def plot(data, combineQ):
     # configures dataframe data into python lists
     instanceCol = list(data.iloc[:, 0])
@@ -39,9 +40,11 @@ def plot(data, combineQ):
     phiModuleCol = list(data.iloc[:, 5])
     stripCol = list(data.iloc[:, 6])
 
+    # dictionaries to group data
     etaStats = {}
     phiStats = {}
 
+    # for each row in data, add to dictionary with metrics
     for row in range(len(instanceCol)):
         id = str(etaModuleCol[row]) + " " + str(phiModuleCol[row])
 
@@ -69,7 +72,7 @@ def plot(data, combineQ):
             else:
                 etaStats[id] = [1, chargeCol[row]]
             
-            
+    # frequency of each event 
     if combineQ == "Y":
         for event in eventIDCol:
             currEvent = str(event)
@@ -82,7 +85,7 @@ def plot(data, combineQ):
                 else:
                     phiStats[currEvent] = [1]
 
-
+    # remove null values 
     if 'nan nan' in etaStats:
         del etaStats['nan nan']
     if 'nan' in etaStats:
@@ -90,13 +93,14 @@ def plot(data, combineQ):
     if 'nan' in phiStats:
         del phiStats['nan']
 
-
+    # put dict keys into list to be read by plt
     etaXLabels = list(etaStats.keys())
     etaFreq = []
 
     phiXLabels = list(phiStats.keys())
     phiFreq = []
 
+    # dict values with corresponding index with axis label
     for item in etaXLabels: 
         etaFreq.append(etaStats[item][0])
 
@@ -105,27 +109,30 @@ def plot(data, combineQ):
     
     if combineQ == "Y" or combineQ == "y":
         fig, axis = plt.subplots(2)
-
+        # graph setup for unique event ids
         axis[0].set_title("frequency of unique event ids")
         axis[0].bar(phiXLabels, phiFreq, width=0.8)
 
+        # graph setup for common pairs
         print("this is how many common pairs there are: ", len(etaXLabels))
         axis[1].set_title("frequency of combined modules against eta and phi")
         axis[1].bar(etaXLabels, etaFreq, width=0.8)
 
+        # add radial histogram based on phi and eta modules 
         # ax = plt.subplot(111, polar=True)
         # bars = ax.bar(phiXLabels, phiFreq, width=0.8) 
         # plt.show()
 
     else: 
         fig, axis = plt.subplots(2)
-
+        # per event frequency graph setup 
         axis[0].set_title("hits deposited for each eta module")
         axis[0].bar(etaXLabels, etaFreq, width=0.8)
 
         axis[1].set_title("hits deposited for each phi module")
         axis[1].bar(phiXLabels, phiFreq, width=0.8)
 
+    # plt show setup
     plt.tight_layout()
     # plt.savefig("./stripHistImages/" + str(int(data['eventIndex'].iloc[0])) + '.pdf', bbox_inches='tight')
     plt.show()
@@ -139,7 +146,7 @@ if file == 'del': # delete all files in dir with certain file extention
     for filename in glob.glob('./*.png'):
         os.remove(filename)
 else: 
-    file = 'stripDataV1.csv'
+    file = 'stripDataV1.csv' # change this file to change location of datam make sure heading formatting is correct 
     dataConf(file)
 
 endTime = time.time()
