@@ -19,10 +19,7 @@ def dataConf(fileName):
     limitsMargin = 25
 
     for id in uniqueEventList:
-        dataBatch = df.loc[df['eventIndex'] == id]
-        # xlims = (dataBatch['localX'].min() - limitsMargin, dataBatch['localX'].max() + limitsMargin)
-        # ylims = (dataBatch['localY'].min() - limitsMargin, dataBatch['localY'].max() + limitsMargin)
-        # zlims = (dataBatch['localZ'].min() - limitsMargin, dataBatch['localZ'].max() + limitsMargin)
+        dataBatch = df.loc[df['eventIndex'] == 74679.0]
         plot(dataBatch, limitsMargin)
 
 def plot(data, margin):

@@ -15,6 +15,7 @@ def dataConf(fileName):
     del uniqueEventList[0]
     print("there are ", len(uniqueEventList), " unique event ids")
     print("highest frequency event index: " + str(df['eventIndex'].mode()))
+    print(" the lowest eta and phi are", df['etaModule'].min(), df['phiModule'].min(), "and the largest eta and phi are", df['etaModule'].max(), df['phiModule'].max())
     
     YNCombinedModules = str(input("Do you want combined modules Y or N? "))
 
