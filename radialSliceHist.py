@@ -30,6 +30,7 @@ def dataConf(fileName):
         print("There is", len(sliceData), "points in this slice\n")
         plot(sliceData, slice, sliceStepSize)
 
+
 # main plotting funtion, data fed from dataConf()
 def plot(sliceData, sliceStartPoint, sliceStepSize):
     
@@ -37,8 +38,17 @@ def plot(sliceData, sliceStartPoint, sliceStepSize):
     phiSliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
     phiSliceAngles_Norm = np.mod(phiSliceAngles, 2*np.pi)
 
+    sliceRadii = np.hypot(sliceData['globalX0'], sliceData['globalY0'])
+
+    plotData = {
+        'phiAngle': phiSliceAngles_Norm,
+        'radii': sliceRadii
+    }
+
+    plottingDf = pd.DataFrame(plotData)
+
     # print df to ee what they are for testing *remove if unneeded
-    print("this is the min and max angles:", phiSliceAngles_Norm.min(), phiSliceAngles_Norm.max())
+    print("these are the min and max angles:", plottingDf['phiAngle'].min(), plottingDf['phiAngle'].max())
     
     # radial histogram settings 
     histBins = 60
@@ -50,7 +60,7 @@ def plot(sliceData, sliceStartPoint, sliceStepSize):
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
-    bars = ax.hist(phiSliceAngles_Norm, bins=histBins, width= barWidth, bottom= barBottom)
+    bars = ax.hist(plottingDf['phiAngle'], bins=histBins, width= barWidth, bottom= barBottom)
 
     # right scatter graph
     ax = plt.subplot(122)
