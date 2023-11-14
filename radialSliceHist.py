@@ -10,6 +10,8 @@ def dataConf(fileName):
     #conv to df
     df = pd.DataFrame(data,columns=['globalX0', 'globalY0', 'globalZ0', 'layerDisk'])
 
+    df = df.dropna()
+
     #passes df to plotting func
     print("The bounds for global 0 xyz are: \n"
           "x:", df['globalX0'].min(), df['globalX0'].max(),"\n"
@@ -27,10 +29,32 @@ def dataConf(fileName):
 
 
 def plot(sliceData, sliceStartPoint, sliceStepSize):
+    
+    phiSliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
 
-    plt.title(("slice of detector from z: ", sliceStartPoint, "to", sliceStartPoint + sliceStepSize))
-    plt.scatter(sliceData['globalX0'], sliceData['globalY0'])
+    phiSliceAngles_Norm = np.mod(phiSliceAngles, 2*np.pi)
 
+    print(phiSliceAngles_Norm, "\n",
+          "this is the max and min angles:", phiSliceAngles_Norm.max(), phiSliceAngles_Norm.min())
+    
+    # radial histogram settings 
+    histBins = 20
+    barBottom = 10
+
+    maxBarHeight = 6
+    barWidth = (2*np.pi) / histBins
+
+    # left radial histogram
+    ax = plt.subplot(121, polar=True)
+    bars = ax.hist(phiSliceAngles_Norm, width= barWidth, bottom= barBottom)
+
+    # right scatter graph
+    ax = plt.subplot(122)
+    ax.set_title(("slice of detector from z: " + str(sliceStartPoint) + " to " + str(sliceStartPoint + sliceStepSize)))
+    ax.scatter(sliceData['globalX0'], sliceData['globalY0'])
+
+    plt.rcParams["figure.figsize"] = (16,9)
+    plt.tight_layout()
     plt.show()
 
 
