@@ -27,6 +27,7 @@ def dataConf(fileName):
     # batches main df data into sliced sections to be sent to plot() func
     for slice in range(int(df['globalZ0'].min()), int(df['globalZ0'].max())+1, int(sliceStepSize)):
         sliceData = df[df['globalZ0'].between(slice, (slice + sliceStepSize) )]
+        print("There is", len(sliceData), "points in this slice\n")
         plot(sliceData, slice, sliceStepSize)
 
 # main plotting funtion, data fed from dataConf()
@@ -35,25 +36,26 @@ def plot(sliceData, sliceStartPoint, sliceStepSize):
     # calc angles from positive X-axis for every point then normalise rads between 0 and 2pi
     phiSliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
     phiSliceAngles_Norm = np.mod(phiSliceAngles, 2*np.pi)
-    
+
     # print df to ee what they are for testing *remove if unneeded
-    print(phiSliceAngles_Norm, "\n",
-          "this is the max and min angles:", phiSliceAngles_Norm.max(), phiSliceAngles_Norm.min())
+    print("this is the min and max angles:", phiSliceAngles_Norm.min(), phiSliceAngles_Norm.max())
     
     # radial histogram settings 
-    histBins = 20
-    barBottom = 10
-
+    histBins = 60
+    barBottom = 5
     maxBarHeight = 6
     barWidth = (2*np.pi) / histBins
 
     # left radial histogram
     ax = plt.subplot(121, polar=True)
-    bars = ax.hist(phiSliceAngles_Norm, width= barWidth, bottom= barBottom)
+    ax.set_theta_zero_location("N")
+    ax.set_theta_direction(-1)
+    bars = ax.hist(phiSliceAngles_Norm, bins=histBins, width= barWidth, bottom= barBottom)
 
     # right scatter graph
     ax = plt.subplot(122)
     ax.set_title(("slice of detector from z: " + str(sliceStartPoint) + " to " + str(sliceStartPoint + sliceStepSize)))
+    ax.grid()
     ax.scatter(sliceData['globalX0'], sliceData['globalY0'])
 
     # general plt settings for figure formatting 
