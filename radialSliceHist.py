@@ -38,11 +38,11 @@ def plot(sliceData, sliceStartPoint, sliceStepSize):
     phiSliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
     phiSliceAngles_Norm = np.mod(phiSliceAngles, 2*np.pi)
 
-    sliceRadii = np.hypot(sliceData['globalX0'], sliceData['globalY0'])
+    sliceRadius = np.hypot(sliceData['globalX0'], sliceData['globalY0'])
 
     plotData = {
         'phiAngle': phiSliceAngles_Norm,
-        'radii': sliceRadii
+        'radius': sliceRadius
     }
 
     plottingDf = pd.DataFrame(plotData)
@@ -56,17 +56,24 @@ def plot(sliceData, sliceStartPoint, sliceStepSize):
     maxBarHeight = 6
     barWidth = (2*np.pi) / histBins
 
+    radiusLowerBound = 370
+    radiusUpperBound = 550
+
     # left radial histogram
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
-    bars = ax.hist(plottingDf['phiAngle'], bins=histBins, width= barWidth, bottom= barBottom)
+    bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(radiusLowerBound, radiusUpperBound), 'phiAngle']), bins=histBins, width= barWidth, bottom= barBottom)
 
     # right scatter graph
     ax = plt.subplot(122)
     ax.set_title(("slice of detector from z: " + str(sliceStartPoint) + " to " + str(sliceStartPoint + sliceStepSize)))
     ax.grid()
-    ax.scatter(sliceData['globalX0'], sliceData['globalY0'])
+    ax.set_xlim(-radiusUpperBound, radiusUpperBound)
+    ax.set_ylim(-radiusUpperBound, radiusUpperBound)
+    ax.scatter(sliceData.loc[plottingDf['radius'].between(radiusLowerBound, radiusUpperBound), 'globalX0'],
+                sliceData.loc[plottingDf['radius'].between(radiusLowerBound, radiusUpperBound),'globalY0']
+               )
 
     # general plt settings for figure formatting 
     plt.rcParams["figure.figsize"] = (16,9)
