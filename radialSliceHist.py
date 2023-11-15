@@ -18,8 +18,6 @@ def dataConf(fileName):
           "z:", df['globalZ0'].min(), df['globalZ0'].max(),"\n"
           )
     
-    
-    
     # user input dictinary to store arguments
     userInputDict = {}
     # geometry z-axis tuple ranges. For barrel side A is pos Z, side C is neg Z
