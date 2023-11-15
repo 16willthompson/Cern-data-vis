@@ -25,67 +25,109 @@ def dataConf(fileName):
     # slice using phi or eta angle as cutting plane, y/x = phi, x/z = eta
     # speisify radius range to view or leave blank to view whole 
 
+    # geometry z-axis tuple ranges. For barrel side A is pos Z, side C is neg Z
+    barrelZRange = (-1450, 1450)
+    aDiskZRange = (1450, 3100)
+    cDiskZRange = (-1450, -3100)
+
+
     userInputDict = {}
-    userInputDict['zDetectorComp'] = input("Do you want to view Barrel or Disk? Leave blank to spesify range or view whole detector. \n")
-    userInputDict['zRange'] = float(input("What z-axis range do you want to view? Leave blank to view whole detector. \n"))
-    userInputDict['slicesQuant'] = int(input("How many slices do you want to split the detector into? \n"))
-    userInputDict['slicePlane'] = input("What slice plane do you wnat to view? 0 for phi and 1 for eta. \n")
-    userInputDict['radusRange'] = int(input("What radius range do you want to view? Leave blank for whole cross section. \n"))
+    userInputDict['zDetectorComp'] = input("Do you want to view Barrel or Disk? Leave blank to spesify range or view whole detector. \n").lower()
+    if userInputDict['zDetectorComp'] == "barrel":
+        userInputDict['zRange'] = barrelZRange
+    elif userInputDict['zDetectorComp'] == "disk":
+        userInputDict['zDiskSide'] = input("Which set of disks of the detector to view? Positive z-axis or Negative z-axis. \n").lower()
+        if userInputDict['zDiskSide'] == "positive":
+            userInputDict['zRange'] = aDiskZRange
+        elif userInputDict['zDiskSide'] == "negative":
+            userInputDict['zRange'] = cDiskZRange
 
+    if 'zRange' not in userInputDict:
+        userInputDict['zRange'] = input("What z-axis range do you want to view? Leave blank to view whole detector. (zMin, zMax) formatting \n")
+        if userInputDict['zRange'] == "":
+            userInputDict['slicesQuant'] = int(input("How many slices do you want to split the detector into? \n"))
+        else:
+            zRangeUISplit = userInputDict['zRange'].split(", ")
+            userInputDict['zRange'] = (int(zRangeUISplit[0]), int(zRangeUISplit[1])) 
+    
+    userInputDict['slicePlane'] = input("What slice plane do you wnat to view? phi or eta. \n").lower()
+    userInputDict['radiusRange'] = input("What radius range do you want to view? Leave blank for whole cross section. (rMin, rMax) formatting \n")
 
-    # arguments for slicing loop
-    zAxisRange = abs(df['globalZ0'].max() - df['globalZ0'].min())
-    userInputDict['sliceStepSize'] = zAxisRange / userInputDict['slicesQuant']
+    if userInputDict['radiusRange'] == "":
+        userInputDict['radiusRange'] = (0, 3200)
+    else:
+        radiusRangeUISplit = userInputDict['radiusRange'].split(", ")
+        userInputDict['radiusRange'] = (int(radiusRangeUISplit[0]), int(radiusRangeUISplit[1]))
 
-    # batches main df data into sliced sections to be sent to plot() func
-    for userInputDict['slice'] in range(int(df['globalZ0'].min()), int(df['globalZ0'].max())+1, int(userInputDict['sliceStepSize'])):
-        sliceData = df[df['globalZ0'].between(userInputDict['slice'], (userInputDict['slice'] + userInputDict['sliceStepSize']) )]
-        print("There is", len(sliceData), "points in this slice\n")
-        plot(sliceData, userInputDict)
+    if 'slicesQuant' in userInputDict:
+        # arguments for slicing loop
+        zAxisRange = abs(df['globalZ0'].max() - df['globalZ0'].min())
+        userInputDict['sliceStepSize'] = zAxisRange / userInputDict['slicesQuant']
+
+        # batches main df data into sliced sections to be sent to plot() func
+        for userInputDict['slice'] in range(int(df['globalZ0'].min()), int(df['globalZ0'].max())+1, int(userInputDict['sliceStepSize'])):
+            sliceData = df[df['globalZ0'].between(userInputDict['slice'], (userInputDict['slice'] + userInputDict['sliceStepSize']) )]
+            print("There is", len(sliceData), "points in this slice\n")
+            plot(sliceData, userInputDict)
+    else: 
+        peramData = df[df['globalZ0'].between(userInputDict['zRange'][0], userInputDict['zRange'][1])]
+        print("There is", len(peramData), "points in this slice\n")
+        plot(peramData, userInputDict)
 
 
 # main plotting funtion, data fed from dataConf()
 def plot(sliceData, userInputDict):
-    
-    # calc angles from positive X-axis for every point then normalise rads between 0 and 2pi
-    phiSliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
-    phiSliceAngles_Norm = np.mod(phiSliceAngles, 2*np.pi)
 
-    sliceRadius = np.hypot(sliceData['globalX0'], sliceData['globalY0'])
+    #init variables 
+    sliceRadius = 0
+    sliceAngles = 0
+
+    # calc angles and radii in phi and eta plane slice
+    if userInputDict['slicePlane'] == "phi":
+        sliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
+        sliceRadius = np.hypot(sliceData['globalX0'], sliceData['globalY0'])
+    elif userInputDict['slicePlane'] == "eta":
+        sliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalZ0'])
+        sliceRadius = np.hypot(sliceData['globalX0'], sliceData['globalZ0'])
+
+    # noramise data and save to df
+    sliceAngles_Norm = np.mod(sliceAngles, 2*np.pi)
 
     plotData = {
-        'phiAngle': phiSliceAngles_Norm,
+        'angle': sliceAngles_Norm,
         'radius': sliceRadius
     }
 
     plottingDf = pd.DataFrame(plotData)
 
     # print df to ee what they are for testing *remove if unneeded
-    print("these are the min and max angles:", plottingDf['phiAngle'].min(), plottingDf['phiAngle'].max())
+    print("these are the min and max angles:", plottingDf['angle'].min(), plottingDf['angle'].max())
     
     # radial histogram settings 
     histBins = 100
     barBottom = 5
     barWidth = (2*np.pi) / histBins
 
-    radiusLowerBound = 370
-    radiusUpperBound = 550
-
     # left radial histogram
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
-    bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(radiusLowerBound, radiusUpperBound), 'phiAngle']), bins=histBins, width= barWidth, bottom= barBottom)
+    bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'angle']), bins=histBins, width= barWidth, bottom= barBottom)
 
     # right scatter graph
     ax = plt.subplot(122)
-    ax.set_title(("slice of detector from z: " + str(userInputDict['slice']) + " to " + str(userInputDict['slice'] + userInputDict['sliceStepSize'])))
     ax.grid()
-    ax.set_xlim(-radiusUpperBound, radiusUpperBound)
-    ax.set_ylim(-radiusUpperBound, radiusUpperBound)
-    ax.scatter(sliceData.loc[plottingDf['radius'].between(radiusLowerBound, radiusUpperBound), 'globalX0'],
-                sliceData.loc[plottingDf['radius'].between(radiusLowerBound, radiusUpperBound),'globalY0']
-               )
+    # ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    # ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    if userInputDict['slicePlane'] == "phi":
+        ax.set_title("slice of detector in phi plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
+        ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'globalX0'],
+                    sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),'globalY0'])
+    elif userInputDict['slicePlane'] == "eta":
+        ax.set_title("slice of detector in eta plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
+        ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'globalX0'],
+                    sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),'globalZ0'])
+    
 
     # general plt settings for figure formatting 
     plt.rcParams["figure.figsize"] = (16,9)
