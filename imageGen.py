@@ -55,7 +55,7 @@ def toImage(data, geo_id, userInputDict):
     plt.grid()
     # checks if user wants to save all plots
     if userInputDict['savePlotImage'] == "yes":
-        plt.savefig("./images/" + str(geo_id) + '.pdf', bbox_inches='tight')
+        plt.savefig("./geoidimages/" + str(geo_id) + '.pdf', bbox_inches='tight')
     if userInputDict['viewPlots'] == "yes":
         plt.show()
 
