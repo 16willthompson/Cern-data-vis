@@ -61,6 +61,9 @@ def dataConf(fileName):
         radiusRangeUISplit = userInputDict['radiusRange'].split(", ")
         userInputDict['radiusRange'] = (int(radiusRangeUISplit[0]), int(radiusRangeUISplit[1]))
 
+    # how many histograms bins the user wants
+    userInputDict['histogramBins'] = int(input("How many histogram bins do you want? \n"))
+
     # automatic slicing after slecting whole dectector 
     if 'slicesQuant' in userInputDict:
         # arguments for slicing loop
@@ -107,8 +110,8 @@ def plot(sliceData, userInputDict):
     print("these are the min and max angles:", plottingDf['angle'].min(), plottingDf['angle'].max())
     
     # radial histogram settings 
-    histBins = 100
-    barBottom = 5
+    histBins = userInputDict['histogramBins']
+    barBottom = plottingDf['radius'].max()
     barWidth = (2*np.pi) / histBins
 
     # left radial histogram
