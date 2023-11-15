@@ -16,24 +16,26 @@ def dataConf(fileName):
     print("Most common geometry_id: " + str(df['geometry_id'].mode()))
 
     # user input questions 
-    generateAllGeoIDs = input("Specify GeoID to plot or leave blank to do all unique GeoIDs: \n")
-    savePlotImage = input("Do you want to save the plot as an image? (yes/no) \n").lower()
+    userInputDict = {}
+    userInputDict['generateAllGeoIDs'] = input("Specify GeoID to plot or leave blank to do all unique GeoIDs: \n")
+    userInputDict['savePlotImage'] = input("Do you want to save the plot as an image? (yes/no) \n").lower()
+    userInputDict['viewPlots'] = input("Do you want to view all plots as they are generated? (yes/no) \n").lower()
 
     #checks if user has specified GeoID, if not do all unique ids
-    if generateAllGeoIDs == "":
+    if userInputDict['generateAllGeoIDs'] == "":
         for id in geometry_idList:
             ProcessStartTime = time.time()
             dataBatch = df.loc[df['geometry_id'] == id]
-            toImage(dataBatch, id, savePlotImage)
+            toImage(dataBatch, id, userInputDict)
             ProcessEndTime = time.time()
             print(ProcessEndTime - ProcessStartTime)
     else:
-        generateAllGeoIDs = int(generateAllGeoIDs)
-        dataBatch = df.loc[df['geometry_id'] == generateAllGeoIDs]
-        toImage(dataBatch, generateAllGeoIDs, savePlotImage)
+        userInputDict['generateAllGeoIDs'] = int(userInputDict['generateAllGeoIDs'])
+        dataBatch = df.loc[df['geometry_id'] == userInputDict['generateAllGeoIDs']]
+        toImage(dataBatch, userInputDict['generateAllGeoIDs'], userInputDict)
 
 # function to plot data and save to file 
-def toImage(data, geo_id, saveQ):
+def toImage(data, geo_id, userInputDict):
     xMax = 1500 #channel0
     yMax = 500 #channel1
 
@@ -52,9 +54,10 @@ def toImage(data, geo_id, saveQ):
     plt.imshow(imageArray, cmap='gray_r', interpolation='none')
     plt.grid()
     # checks if user wants to save all plots
-    if saveQ == "yes":
+    if userInputDict['savePlotImage'] == "yes":
         plt.savefig("./images/" + str(geo_id) + '.pdf', bbox_inches='tight')
-    plt.show()
+    if userInputDict['viewPlots'] == "yes":
+        plt.show()
 
 #user input for file selection
 file = input("Path of file to process, blank for default or del to delete previous files*: ")
