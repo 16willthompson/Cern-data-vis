@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 # data configuration and formatting to be sent to plot()
 def dataConf(fileName): 
     # read in csv data and spesifiy cols
-    data = pd.read_csv(fileName, usecols=['globalX0', 'globalY0', 'globalZ0', 'layerDisk'])
+    data = pd.read_csv(fileName, usecols=['globalX0', 'globalY0', 'globalZ0', 'layerDisk', 'eventIndex'])
 
     #conv to df and drop null values 
-    df = pd.DataFrame(data,columns=['globalX0', 'globalY0', 'globalZ0', 'layerDisk'])
+    df = pd.DataFrame(data,columns=['globalX0', 'globalY0', 'globalZ0', 'layerDisk', 'eventIndex'])
     df = df.dropna()
 
     # outputs boundaries of csv data
@@ -21,6 +21,7 @@ def dataConf(fileName):
     # user input dictinary to store arguments
     userInputDict = {}
     # geometry z-axis tuple ranges. For barrel side A is pos Z, side C is neg Z
+    detectorZRange = (-3100, 3100)
     barrelZRange = (-1450, 1450)
     aDiskZRange = (1450, 3100)
     cDiskZRange = (-1450, -3100)
@@ -44,13 +45,14 @@ def dataConf(fileName):
 
         # specify radius range to view or leave blank to view whole 
         if userInputDict['zRange'] == "":
+            userInputDict['zRange'] = detectorZRange
             userInputDict['slicesQuant'] = int(input("How many slices do you want to split the detector into? \n"))
         else:
             zRangeUISplit = userInputDict['zRange'].split(", ")
             userInputDict['zRange'] = (int(zRangeUISplit[0]), int(zRangeUISplit[1])) 
     
     # slice using phi or eta angle as cutting plane, y/x = phi, x/z = eta
-    userInputDict['slicePlane'] = input("What slice plane do you wnat to view? phi or eta. \n").lower()
+    userInputDict['slicePlane'] = input("What slice plane do you want to view? phi or eta. \n").lower()
 
     # input for radius range splits string with correct formatting
     userInputDict['radiusRange'] = input("What radius range do you want to view? Leave blank for whole cross section. (rMin, rMax) formatting \n")
@@ -107,7 +109,8 @@ def plot(sliceData, userInputDict):
     plottingDf = pd.DataFrame(plotData)
 
     # print df to ee what they are for testing *remove if unneeded
-    print("these are the min and max angles:", plottingDf['angle'].min(), plottingDf['angle'].max())
+    print("These are the min and max angles:", plottingDf['angle'].min(), plottingDf['angle'].max(),
+          "\nThere are", len(sliceData['eventIndex'].unique()), "unique eventIndex \n")
     
     # radial histogram settings 
     histBins = userInputDict['histogramBins']
@@ -115,6 +118,8 @@ def plot(sliceData, userInputDict):
     barWidth = (2*np.pi) / histBins
 
     # left radial histogram
+    plt.figure("Slice histogram and scatter graph")
+    
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
@@ -134,6 +139,9 @@ def plot(sliceData, userInputDict):
         ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'globalX0'],
                     sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),'globalZ0'])
     
+    # plt.figure(1)
+
+
     # general plt settings for figure formatting 
     plt.rcParams["figure.figsize"] = (16,9)
     plt.tight_layout()
