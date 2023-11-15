@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import time, glob, os
 
 # data configuration and formatting to be sent to plot()
 def dataConf(fileName): 
@@ -18,39 +17,44 @@ def dataConf(fileName):
           "y:", df['globalY0'].min(), df['globalY0'].max(),"\n"
           "z:", df['globalZ0'].min(), df['globalZ0'].max(),"\n"
           )
-
-    # user input 
-    # does the user want to:
-    # spesify z range or slice whole detector
-    # slice using phi or eta angle as cutting plane, y/x = phi, x/z = eta
-    # speisify radius range to view or leave blank to view whole 
-
+    
+    
+    
+    # user input dictinary to store arguments
+    userInputDict = {}
     # geometry z-axis tuple ranges. For barrel side A is pos Z, side C is neg Z
     barrelZRange = (-1450, 1450)
     aDiskZRange = (1450, 3100)
     cDiskZRange = (-1450, -3100)
 
-
-    userInputDict = {}
-    userInputDict['zDetectorComp'] = input("Do you want to view Barrel or Disk? Leave blank to spesify range or view whole detector. \n").lower()
+    # barrel or disk, leaving blank for custom range
+    userInputDict['zDetectorComp'] = input("Do you want to view Barrel or Disk? Leave blank to specify range or view whole detector. \n").lower()
     if userInputDict['zDetectorComp'] == "barrel":
         userInputDict['zRange'] = barrelZRange
     elif userInputDict['zDetectorComp'] == "disk":
         userInputDict['zDiskSide'] = input("Which set of disks of the detector to view? Positive z-axis or Negative z-axis. \n").lower()
+
+        # set zRange using predefined defaults
         if userInputDict['zDiskSide'] == "positive":
             userInputDict['zRange'] = aDiskZRange
         elif userInputDict['zDiskSide'] == "negative":
             userInputDict['zRange'] = cDiskZRange
 
+    # specify z range or slice whole detector if barrel or disk isnt selected
     if 'zRange' not in userInputDict:
         userInputDict['zRange'] = input("What z-axis range do you want to view? Leave blank to view whole detector. (zMin, zMax) formatting \n")
+
+        # specify radius range to view or leave blank to view whole 
         if userInputDict['zRange'] == "":
             userInputDict['slicesQuant'] = int(input("How many slices do you want to split the detector into? \n"))
         else:
             zRangeUISplit = userInputDict['zRange'].split(", ")
             userInputDict['zRange'] = (int(zRangeUISplit[0]), int(zRangeUISplit[1])) 
     
+    # slice using phi or eta angle as cutting plane, y/x = phi, x/z = eta
     userInputDict['slicePlane'] = input("What slice plane do you wnat to view? phi or eta. \n").lower()
+
+    # input for radius range splits string with correct formatting
     userInputDict['radiusRange'] = input("What radius range do you want to view? Leave blank for whole cross section. (rMin, rMax) formatting \n")
 
     if userInputDict['radiusRange'] == "":
@@ -59,6 +63,7 @@ def dataConf(fileName):
         radiusRangeUISplit = userInputDict['radiusRange'].split(", ")
         userInputDict['radiusRange'] = (int(radiusRangeUISplit[0]), int(radiusRangeUISplit[1]))
 
+    # automatic slicing after slecting whole dectector 
     if 'slicesQuant' in userInputDict:
         # arguments for slicing loop
         zAxisRange = abs(df['globalZ0'].max() - df['globalZ0'].min())
@@ -69,7 +74,7 @@ def dataConf(fileName):
             sliceData = df[df['globalZ0'].between(userInputDict['slice'], (userInputDict['slice'] + userInputDict['sliceStepSize']) )]
             print("There is", len(sliceData), "points in this slice\n")
             plot(sliceData, userInputDict)
-    else: 
+    else: # plot user spesified perams
         peramData = df[df['globalZ0'].between(userInputDict['zRange'][0], userInputDict['zRange'][1])]
         print("There is", len(peramData), "points in this slice\n")
         plot(peramData, userInputDict)
@@ -128,26 +133,16 @@ def plot(sliceData, userInputDict):
         ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'globalX0'],
                     sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),'globalZ0'])
     
-
     # general plt settings for figure formatting 
     plt.rcParams["figure.figsize"] = (16,9)
     plt.tight_layout()
     plt.show()
 
-
 #user input for file selection
 file = input("Path of file to process: \n")
-startTime = time.time()
 
-if file == 'del': # delete all files in dir with certain file extention
-    for filename in glob.glob('./*.png'):
-        os.remove(filename)
-elif file != "": # calls dataConf with user input string
+if file != "": # calls dataConf with user input string
     dataConf(file)
 else: 
     file = 'stripDataV1.csv' # change this file to change location of datam make sure heading formatting is correct 
     dataConf(file)
-
-# print total time taken (used for benchmarking)
-endTime = time.time()
-print(endTime-startTime)
