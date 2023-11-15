@@ -19,20 +19,33 @@ def dataConf(fileName):
           "z:", df['globalZ0'].min(), df['globalZ0'].max(),"\n"
           )
 
-    # user input and calculates arguments for slicing loop
-    slicesQuant = int(input("how many slices do you want to split the detector into? "))
+    # user input 
+    # does the user want to:
+    # spesify z range or slice whole detector
+    # slice using phi or eta angle as cutting plane, y/x = phi, x/z = eta
+    # speisify radius range to view or leave blank to view whole 
+
+    userInputDict = {}
+    userInputDict['zDetectorComp'] = input("Do you want to view Barrel or Disk? Leave blank to spesify range or view whole detector. \n")
+    userInputDict['zRange'] = float(input("What z-axis range do you want to view? Leave blank to view whole detector. \n"))
+    userInputDict['slicesQuant'] = int(input("How many slices do you want to split the detector into? \n"))
+    userInputDict['slicePlane'] = input("What slice plane do you wnat to view? 0 for phi and 1 for eta. \n")
+    userInputDict['radusRange'] = int(input("What radius range do you want to view? Leave blank for whole cross section. \n"))
+
+
+    # arguments for slicing loop
     zAxisRange = abs(df['globalZ0'].max() - df['globalZ0'].min())
-    sliceStepSize = zAxisRange / slicesQuant
+    userInputDict['sliceStepSize'] = zAxisRange / userInputDict['slicesQuant']
 
     # batches main df data into sliced sections to be sent to plot() func
-    for slice in range(int(df['globalZ0'].min()), int(df['globalZ0'].max())+1, int(sliceStepSize)):
-        sliceData = df[df['globalZ0'].between(slice, (slice + sliceStepSize) )]
+    for userInputDict['slice'] in range(int(df['globalZ0'].min()), int(df['globalZ0'].max())+1, int(userInputDict['sliceStepSize'])):
+        sliceData = df[df['globalZ0'].between(userInputDict['slice'], (userInputDict['slice'] + userInputDict['sliceStepSize']) )]
         print("There is", len(sliceData), "points in this slice\n")
-        plot(sliceData, slice, sliceStepSize)
+        plot(sliceData, userInputDict)
 
 
 # main plotting funtion, data fed from dataConf()
-def plot(sliceData, sliceStartPoint, sliceStepSize):
+def plot(sliceData, userInputDict):
     
     # calc angles from positive X-axis for every point then normalise rads between 0 and 2pi
     phiSliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
@@ -51,9 +64,8 @@ def plot(sliceData, sliceStartPoint, sliceStepSize):
     print("these are the min and max angles:", plottingDf['phiAngle'].min(), plottingDf['phiAngle'].max())
     
     # radial histogram settings 
-    histBins = 60
+    histBins = 100
     barBottom = 5
-    maxBarHeight = 6
     barWidth = (2*np.pi) / histBins
 
     radiusLowerBound = 370
@@ -67,7 +79,7 @@ def plot(sliceData, sliceStartPoint, sliceStepSize):
 
     # right scatter graph
     ax = plt.subplot(122)
-    ax.set_title(("slice of detector from z: " + str(sliceStartPoint) + " to " + str(sliceStartPoint + sliceStepSize)))
+    ax.set_title(("slice of detector from z: " + str(userInputDict['slice']) + " to " + str(userInputDict['slice'] + userInputDict['sliceStepSize'])))
     ax.grid()
     ax.set_xlim(-radiusUpperBound, radiusUpperBound)
     ax.set_ylim(-radiusUpperBound, radiusUpperBound)
