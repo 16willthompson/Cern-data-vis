@@ -67,7 +67,7 @@ def dataConf(fileName):
     userInputDict['histogramBins'] = input("How many histogram bins do you want? Leave blank to calc pixelwidth as binsize  \n")
 
     if userInputDict['histogramBins'] == "":
-        userInputDict['histogramBins'] = "pixel"
+        userInputDict['pixelBinning'] = int(input("How many pixels do you want to bin together? Input an integer \n"))
     else:
         userInputDict['histogramBins'] = int(userInputDict['histogramBins'])
 
@@ -124,7 +124,7 @@ def plot(sliceData, userInputDict):
     plottingDf = pd.DataFrame(plotData)
 
     # print df to ee what they are for testing *remove if unneeded
-    print("These are the min and max angles:", plottingDf['angle'].min(), plottingDf['angle'].max(),
+    print("These are the min and max radii:", plottingDf['radius'].min(), plottingDf['radius'].max(),
           "\nThere are", len(sliceData['eventIndex'].unique()), "unique eventIndex \n")
     
     # radial histogram settings 
@@ -132,7 +132,7 @@ def plot(sliceData, userInputDict):
         # calc number of bins to get binsize the same as a pixel
         radiusAvg = plottingDf['radius'].mean()
         radiusCirc = 2 * np.pi * radiusAvg #radcirc in mm 
-        histBins = int((radiusCirc / (80e-3)) /100) # 80um for pixel size
+        histBins = int((radiusCirc / (80e-3)) / userInputDict['pixelBinning']) # 80um for pixel size
     else:
         histBins = userInputDict['histogramBins']
     
@@ -140,15 +140,15 @@ def plot(sliceData, userInputDict):
     barWidth = (2*np.pi) / histBins
 
     # fig size 
-    defaultFigSize = (16, 9) 
+    plt.rcParams["figure.figsize"] = (16, 9) 
 
     # left radial histogram
-    plt.figure("Slice histogram and scatter graph", figsize=defaultFigSize)
+    plt.figure("Slice histogram and scatter graph")
     
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
-    ax.set_ylim(radiusAvg - 20, radiusAvg + 20)
+    ax.set_ylim(bottom= plottingDf['radius'].max() - 5, top= plottingDf['radius'].max() + 10)
     bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'angle']), bins=histBins, width= barWidth, bottom= barBottom)
 
     # right scatter graph
@@ -164,7 +164,6 @@ def plot(sliceData, userInputDict):
     # plt.figure(1)
 
     # general plt settings for figure formatting 
-    plt.rcParams["figure.figsize"] = defaultFigSize
     plt.tight_layout()
     plt.show()
 
