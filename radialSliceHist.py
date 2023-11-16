@@ -123,14 +123,20 @@ def plot(sliceData, userInputDict):
 
     plottingDf = pd.DataFrame(plotData)
 
+    print(plottingDf)
+
+    plottingDf = plottingDf[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1])]
+
+    print(plottingDf)
+
     # print df to ee what they are for testing *remove if unneeded
     print("These are the min and max radii:", plottingDf['radius'].min(), plottingDf['radius'].max(),
           "\nThere are", len(sliceData['eventIndex'].unique()), "unique eventIndex \n")
     
     # radial histogram settings 
+    radiusAvg = plottingDf['radius'].mean()
     if isinstance(userInputDict['histogramBins'], str):
         # calc number of bins to get binsize the same as a pixel
-        radiusAvg = plottingDf['radius'].mean()
         radiusCirc = 2 * np.pi * radiusAvg #radcirc in mm 
         histBins = int((radiusCirc / (80e-3)) / userInputDict['pixelBinning']) # 80um for pixel size
     else:
@@ -148,18 +154,18 @@ def plot(sliceData, userInputDict):
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
-    ax.set_ylim(bottom= plottingDf['radius'].max() - 5, top= plottingDf['radius'].max() + 10)
+    ax.set_ylim(bottom= plottingDf['radius'].min() - 5, top= plottingDf['radius'].max() + 10)
     bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'angle']), bins=histBins, width= barWidth, bottom= barBottom)
 
     # right scatter graph
-    ax = plt.subplot(122)
-    ax.grid()
-    ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
-    ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    # ax = plt.subplot(122)
+    # ax.grid()
+    # ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    # ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
     
-    ax.set_title("slice of detector in " + userInputDict['slicePlane'] + " plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
-    ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), slicePlaneAxis[0]],
-                sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),slicePlaneAxis[1]])
+    # ax.set_title("slice of detector in " + userInputDict['slicePlane'] + " plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
+    # ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), slicePlaneAxis[0]],
+    #             sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),slicePlaneAxis[1]])
     
     # plt.figure(1)
 
