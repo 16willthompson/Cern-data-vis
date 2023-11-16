@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 # data configuration and formatting to be sent to plot()
 def dataConf(fileName): 
@@ -91,7 +92,7 @@ def dataConf(fileName):
 
 # main plotting funtion, data fed from dataConf()
 def plot(sliceData, userInputDict):
-
+    # ---- Calulations ---- 
     #init variables 
     sliceRadius = 0
     sliceAngles = 0
@@ -123,8 +124,9 @@ def plot(sliceData, userInputDict):
     plottingDf = plottingDf[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1])]
 
     # print min and max radii for recording and how many unique event ids
+    uniqueEventIndexList = sliceData['eventIndex'].unique()
     print("These are the min and max radii:", plottingDf['radius'].min(), plottingDf['radius'].max(),
-          "\nThere are", len(sliceData['eventIndex'].unique()), "unique eventIndex \n")
+          "\nThere are", len(uniqueEventIndexList), "unique eventIndex \n")
     
     # radial histogram settings 
     radiusAvg = plottingDf['radius'].mean()
@@ -138,6 +140,7 @@ def plot(sliceData, userInputDict):
     barBottom = radiusAvg
     barWidth = (2*np.pi) / histBins
 
+    # ---- Plotting ----
     # fig size 
     plt.rcParams["figure.figsize"] = (16, 9) 
 
@@ -147,13 +150,12 @@ def plot(sliceData, userInputDict):
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
-    ax.set_ylim(bottom= plottingDf['radius'].min(), top= plottingDf['radius'].max() + 10)
+    ax.set_ylim(bottom= plottingDf['radius'].min(), top= plottingDf['radius'].max() + 5)
     bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'angle']), bins=histBins, width= barWidth, bottom= barBottom)
-
-    # print(sliceData.iloc[plottingDf['radius'], slicePlaneAxis[0]])
 
     # right scatter graph
     ax = plt.subplot(122)
+    ax.axis('equal')
     ax.grid()
     ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
     ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
@@ -161,11 +163,25 @@ def plot(sliceData, userInputDict):
     ax.scatter(sliceData[slicePlaneAxis[0]],
                 sliceData[slicePlaneAxis[1]])
     
-    # 2d histogram for phi and eta angles
-    # plt.figure(1)
+    plt.figure("Global coordinate scatter with eventIndex colouring")
+    ax = plt.subplot(111)
+    ax.axis('equal')
+    ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
 
-    # general plt settings for figure formatting 
-    plt.tight_layout()
+    number_of_colors = len(uniqueEventIndexList)
+
+    scatterColor = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
+            for i in range(number_of_colors)]
+
+    for index, event in enumerate(uniqueEventIndexList):
+        ax.scatter(sliceData.loc[sliceData['eventIndex'] == event, slicePlaneAxis[0]],
+                   sliceData.loc[sliceData['eventIndex'] == event, slicePlaneAxis[1]], 
+                   c=scatterColor[index])
+
+    # 2d histogram for phi and eta angles
+    # plt.figure(2)
+    
     plt.show()
 
 #user input for file selection
