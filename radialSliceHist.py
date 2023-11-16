@@ -89,14 +89,17 @@ def plot(sliceData, userInputDict):
     #init variables 
     sliceRadius = 0
     sliceAngles = 0
+    slicePlaneAxis = 0
 
     # calc angles and radii in phi and eta plane slice
     if userInputDict['slicePlane'] == "phi":
         sliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
         sliceRadius = np.hypot(sliceData['globalX0'], sliceData['globalY0'])
+        slicePlaneAxis = ('globalX0', 'globalY0')
     elif userInputDict['slicePlane'] == "eta":
         sliceAngles = np.arctan2(sliceData['globalX0'], sliceData['globalZ0'])
         sliceRadius = np.hypot(sliceData['globalX0'], sliceData['globalZ0'])
+        slicePlaneAxis = ('globalX0', 'globalZ0')
 
     # noramise data and save to df
     sliceAngles_Norm = np.mod(sliceAngles, 2*np.pi)
@@ -128,19 +131,14 @@ def plot(sliceData, userInputDict):
     # right scatter graph
     ax = plt.subplot(122)
     ax.grid()
-    # ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
-    # ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
-    if userInputDict['slicePlane'] == "phi":
-        ax.set_title("slice of detector in phi plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
-        ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'globalX0'],
-                    sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),'globalY0'])
-    elif userInputDict['slicePlane'] == "eta":
-        ax.set_title("slice of detector in eta plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
-        ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'globalX0'],
-                    sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),'globalZ0'])
+    ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    
+    ax.set_title("slice of detector in " + userInputDict['slicePlane'] + " plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
+    ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), slicePlaneAxis[0]],
+                sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),slicePlaneAxis[1]])
     
     # plt.figure(1)
-
 
     # general plt settings for figure formatting 
     plt.rcParams["figure.figsize"] = (16,9)
