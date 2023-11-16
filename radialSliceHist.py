@@ -107,12 +107,6 @@ def plot(sliceData, userInputDict):
         sliceRadius = np.hypot(sliceData['globalX0'], sliceData['globalZ0'])
         slicePlaneAxis = ('globalX0', 'globalZ0')
 
-    # # phi and eta angle 2d hist data
-    # phiAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
-    # thetaAngles = np.arctan2(sliceData['globalX0'], sliceData['globalZ0'])
-    # etaAngles = np.tan(thetaAngles.values / np.full(len(thetaAngles), 2))
-
-    # print(phiAngles, thetaAngles, etaAngles.max())
     # noramise data and save to df
     sliceAngles_Norm = np.mod(sliceAngles, 2*np.pi)
 
@@ -123,13 +117,12 @@ def plot(sliceData, userInputDict):
 
     plottingDf = pd.DataFrame(plotData)
 
-    print(plottingDf)
+    # filters slice data down to spesified radius range 
+    sliceData = sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1])]
 
     plottingDf = plottingDf[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1])]
 
-    print(plottingDf)
-
-    # print df to ee what they are for testing *remove if unneeded
+    # print min and max radii for recording and how many unique event ids
     print("These are the min and max radii:", plottingDf['radius'].min(), plottingDf['radius'].max(),
           "\nThere are", len(sliceData['eventIndex'].unique()), "unique eventIndex \n")
     
@@ -154,19 +147,21 @@ def plot(sliceData, userInputDict):
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
-    ax.set_ylim(bottom= plottingDf['radius'].min() - 5, top= plottingDf['radius'].max() + 10)
+    ax.set_ylim(bottom= plottingDf['radius'].min(), top= plottingDf['radius'].max() + 10)
     bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'angle']), bins=histBins, width= barWidth, bottom= barBottom)
 
+    # print(sliceData.iloc[plottingDf['radius'], slicePlaneAxis[0]])
+
     # right scatter graph
-    # ax = plt.subplot(122)
-    # ax.grid()
-    # ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
-    # ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    ax = plt.subplot(122)
+    ax.grid()
+    ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
+    ax.set_title("slice of detector in " + userInputDict['slicePlane'] + " plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
+    ax.scatter(sliceData[slicePlaneAxis[0]],
+                sliceData[slicePlaneAxis[1]])
     
-    # ax.set_title("slice of detector in " + userInputDict['slicePlane'] + " plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
-    # ax.scatter(sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), slicePlaneAxis[0]],
-    #             sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]),slicePlaneAxis[1]])
-    
+    # 2d histogram for phi and eta angles
     # plt.figure(1)
 
     # general plt settings for figure formatting 
