@@ -122,11 +122,6 @@ def plot(sliceData, userInputDict):
     sliceData = sliceData.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1])]
 
     plottingDf = plottingDf[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1])]
-
-    # print min and max radii for recording and how many unique event ids
-    uniqueEventIndexList = sliceData['eventIndex'].unique()
-    print("These are the min and max radii:", plottingDf['radius'].min(), plottingDf['radius'].max(),
-          "\nThere are", len(uniqueEventIndexList), "unique eventIndex \n")
     
     # radial histogram settings 
     radiusAvg = plottingDf['radius'].mean()
@@ -140,6 +135,14 @@ def plot(sliceData, userInputDict):
     barBottom = radiusAvg
     barWidth = (2*np.pi) / histBins
 
+    # print min and max radii for recording and how many unique event ids, stat summary 
+    uniqueEventIndexList = sliceData['eventIndex'].unique()
+    radiusMin = plottingDf['radius'].min()
+    radiusMax = plottingDf['radius'].max()
+    print("These are the min and max radii:", radiusMin, radiusMax, "\n",
+          "The average radius is", radiusAvg, "\n",
+          "There are", len(uniqueEventIndexList), "unique eventIndex \n")
+
     # ---- Plotting ----
     # fig size 
     plt.rcParams["figure.figsize"] = (16, 9) 
@@ -150,15 +153,13 @@ def plot(sliceData, userInputDict):
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
-    ax.set_ylim(bottom= plottingDf['radius'].min(), top= plottingDf['radius'].max() + 5)
+    ax.set_ylim(bottom= radiusMin, top= radiusMax + 5)
     bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'angle']), bins=histBins, width= barWidth, bottom= barBottom)
 
     # right scatter graph
     ax = plt.subplot(122)
     ax.axis('equal')
     ax.grid()
-    ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
-    ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
     ax.set_title("slice of detector in " + userInputDict['slicePlane'] + " plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
     ax.scatter(sliceData[slicePlaneAxis[0]],
                 sliceData[slicePlaneAxis[1]])
@@ -166,11 +167,9 @@ def plot(sliceData, userInputDict):
     plt.figure("Global coordinate scatter with eventIndex colouring")
     ax = plt.subplot(111)
     ax.axis('equal')
-    ax.set_xlim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
-    ax.set_ylim(-userInputDict['radiusRange'][1], userInputDict['radiusRange'][1])
 
+    # generate colour list for unique events
     number_of_colors = len(uniqueEventIndexList)
-
     scatterColor = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
             for i in range(number_of_colors)]
 
@@ -181,7 +180,7 @@ def plot(sliceData, userInputDict):
 
     # 2d histogram for phi and eta angles
     # plt.figure(2)
-    
+
     plt.show()
 
 #user input for file selection
