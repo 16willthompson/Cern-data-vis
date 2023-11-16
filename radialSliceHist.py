@@ -64,7 +64,13 @@ def dataConf(fileName):
         userInputDict['radiusRange'] = (int(radiusRangeUISplit[0]), int(radiusRangeUISplit[1]))
 
     # how many histograms bins the user wants
-    userInputDict['histogramBins'] = int(input("How many histogram bins do you want? \n"))
+    userInputDict['histogramBins'] = input("How many histogram bins do you want? Leave blank to calc pixelwidth as binsize  \n")
+
+    if userInputDict['histogramBins'] == "":
+        userInputDict['histogramBins'] = "pixel"
+    else:
+        userInputDict['histogramBins'] = int(userInputDict['histogramBins'])
+
 
     # automatic slicing after slecting whole dectector 
     if 'slicesQuant' in userInputDict:
@@ -101,6 +107,12 @@ def plot(sliceData, userInputDict):
         sliceRadius = np.hypot(sliceData['globalX0'], sliceData['globalZ0'])
         slicePlaneAxis = ('globalX0', 'globalZ0')
 
+    # # phi and eta angle 2d hist data
+    # phiAngles = np.arctan2(sliceData['globalX0'], sliceData['globalY0'])
+    # thetaAngles = np.arctan2(sliceData['globalX0'], sliceData['globalZ0'])
+    # etaAngles = np.tan(thetaAngles.values / np.full(len(thetaAngles), 2))
+
+    # print(phiAngles, thetaAngles, etaAngles.max())
     # noramise data and save to df
     sliceAngles_Norm = np.mod(sliceAngles, 2*np.pi)
 
@@ -116,16 +128,27 @@ def plot(sliceData, userInputDict):
           "\nThere are", len(sliceData['eventIndex'].unique()), "unique eventIndex \n")
     
     # radial histogram settings 
-    histBins = userInputDict['histogramBins']
-    barBottom = plottingDf['radius'].max()
+    if isinstance(userInputDict['histogramBins'], str):
+        # calc number of bins to get binsize the same as a pixel
+        radiusAvg = plottingDf['radius'].mean()
+        radiusCirc = 2 * np.pi * radiusAvg #radcirc in mm 
+        histBins = int((radiusCirc / (80e-3)) /100) # 80um for pixel size
+    else:
+        histBins = userInputDict['histogramBins']
+    
+    barBottom = radiusAvg
     barWidth = (2*np.pi) / histBins
 
+    # fig size 
+    defaultFigSize = (16, 9) 
+
     # left radial histogram
-    plt.figure("Slice histogram and scatter graph")
+    plt.figure("Slice histogram and scatter graph", figsize=defaultFigSize)
     
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
+    ax.set_ylim(radiusAvg - 20, radiusAvg + 20)
     bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'angle']), bins=histBins, width= barWidth, bottom= barBottom)
 
     # right scatter graph
@@ -141,7 +164,7 @@ def plot(sliceData, userInputDict):
     # plt.figure(1)
 
     # general plt settings for figure formatting 
-    plt.rcParams["figure.figsize"] = (16,9)
+    plt.rcParams["figure.figsize"] = defaultFigSize
     plt.tight_layout()
     plt.show()
 
