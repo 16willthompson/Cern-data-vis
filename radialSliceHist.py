@@ -86,7 +86,7 @@ def dataConf(fileName):
             plot(sliceData, userInputDict)
     else: # plot user spesified perams
         peramData = df[df['globalZ0'].between(userInputDict['zRange'][0], userInputDict['zRange'][1])]
-        print("There is", len(peramData), "points in this slice\n")
+        print("There is", len(peramData), "points in this z-axis slice\n")
         plot(peramData, userInputDict)
 
 
@@ -141,20 +141,24 @@ def plot(sliceData, userInputDict):
     radiusMax = plottingDf['radius'].max()
     print("These are the min and max radii:", radiusMin, radiusMax, "\n",
           "The average radius is", radiusAvg, "\n",
+          "There is", len(plottingDf), "points within spesified radius \n",
           "There are", len(uniqueEventIndexList), "unique eventIndex \n")
 
     # ---- Plotting ----
-    # fig size 
+    # global perams
     plt.rcParams["figure.figsize"] = (16, 9) 
+    plt.rcParams["figure.autolayout"] = True
+    scatterPointSize = 5
 
     # left radial histogram
     plt.figure("Slice histogram and scatter graph")
-    
+
     ax = plt.subplot(121, polar=True)
     ax.set_theta_zero_location("N")
     ax.set_theta_direction(-1)
-    ax.set_ylim(bottom= radiusMin, top= radiusMax + 5)
-    bars = ax.hist((plottingDf.loc[plottingDf['radius'].between(userInputDict['radiusRange'][0], userInputDict['radiusRange'][1]), 'angle']), bins=histBins, width= barWidth, bottom= barBottom)
+    values, bins, bars = ax.hist(plottingDf['angle'], bins=histBins, width= barWidth, bottom= barBottom)
+    ax.set_ylim(bottom= radiusMin, top= barBottom + values.max() + 2)
+    # ax.bar_label(bars, padding=0.1, fontsize=6)
 
     # right scatter graph
     ax = plt.subplot(122)
@@ -162,9 +166,12 @@ def plot(sliceData, userInputDict):
     ax.grid()
     ax.set_title("slice of detector in " + userInputDict['slicePlane'] + " plane from z: " + str(userInputDict['zRange'][0]) + " to " + str(userInputDict['zRange'][1]))
     ax.scatter(sliceData[slicePlaneAxis[0]],
-                sliceData[slicePlaneAxis[1]])
+                sliceData[slicePlaneAxis[1]],
+                s=scatterPointSize)
     
+    # scatter for showing unique event ids in slice
     plt.figure("Global coordinate scatter with eventIndex colouring")
+
     ax = plt.subplot(111)
     ax.axis('equal')
 
@@ -176,11 +183,10 @@ def plot(sliceData, userInputDict):
     for index, event in enumerate(uniqueEventIndexList):
         ax.scatter(sliceData.loc[sliceData['eventIndex'] == event, slicePlaneAxis[0]],
                    sliceData.loc[sliceData['eventIndex'] == event, slicePlaneAxis[1]], 
-                   c=scatterColor[index])
+                   c=scatterColor[index], s=scatterPointSize)
 
     # 2d histogram for phi and eta angles
     # plt.figure(2)
-
     plt.show()
 
 #user input for file selection
