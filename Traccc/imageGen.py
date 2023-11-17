@@ -22,6 +22,7 @@ def dataConf(fileName):
     userInputDict['viewPlots'] = input("Do you want to view all plots as they are generated? (yes/no) \n").lower()
     userInputDict['printRunTime'] = input("do you want to view the ammount of time taken per plot? (yes/no) \n").lower
 
+
     #checks if user has specified GeoID, if not do all unique ids
 
     if userInputDict['generateAllGeoIDs'] == "":
