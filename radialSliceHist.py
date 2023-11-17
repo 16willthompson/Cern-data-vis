@@ -85,7 +85,7 @@ def dataConf(fileName):
             print("There is", len(sliceData), "points in this slice\n")
             plot(sliceData, userInputDict)
     else: # plot user spesified perams
-        peramData = df[df['globalZ0'].between(userInputDict['zRange'][0], userInputDict['zRange'][1])]
+        peramData = df[df['globalZ0'].between(min(userInputDict['zRange']), max(userInputDict['zRange']) )]
         print("There is", len(peramData), "points in this z-axis slice\n")
         plot(peramData, userInputDict)
 
