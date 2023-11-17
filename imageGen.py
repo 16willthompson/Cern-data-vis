@@ -20,15 +20,18 @@ def dataConf(fileName):
     userInputDict['generateAllGeoIDs'] = input("Specify GeoID to plot or leave blank to do all unique GeoIDs: \n")
     userInputDict['savePlotImage'] = input("Do you want to save the plot as an image? (yes/no) \n").lower()
     userInputDict['viewPlots'] = input("Do you want to view all plots as they are generated? (yes/no) \n").lower()
+    userInputDict['printRunTime'] = input("do you want to view the ammount of time taken per plot? \n").lower
 
     #checks if user has specified GeoID, if not do all unique ids
+
     if userInputDict['generateAllGeoIDs'] == "":
         for id in geometry_idList:
             ProcessStartTime = time.time()
             dataBatch = df.loc[df['geometry_id'] == id]
             toImage(dataBatch, id, userInputDict)
             ProcessEndTime = time.time()
-            print(ProcessEndTime - ProcessStartTime)
+            if userInputDict['printRunTime'] == "yes":
+                print(ProcessEndTime - ProcessStartTime)
     else:
         userInputDict['generateAllGeoIDs'] = int(userInputDict['generateAllGeoIDs'])
         dataBatch = df.loc[df['geometry_id'] == userInputDict['generateAllGeoIDs']]
@@ -47,12 +50,13 @@ def toImage(data, geo_id, userInputDict):
         imageArray[int(hit['channel0']), int(hit['channel1'])] = 1
 
     # plt setup
-    plt.figure(figsize=(10,6))
+    plt.figure(figsize=(12,6))
     plt.xlim(0, xMax)
     plt.ylim(0, yMax)
     plt.title('Sensor hits on ID: ' + str(geo_id))
     plt.imshow(imageArray, cmap='gray_r', interpolation='none')
     plt.grid()
+    plt.tight_layout()
     # checks if user wants to save all plots
     if userInputDict['savePlotImage'] == "yes":
         plt.savefig("./geoidimages/" + str(geo_id) + '.pdf', bbox_inches='tight')
@@ -71,4 +75,4 @@ else:
     dataConf(file)
 
 endTime = time.time()
-print(endTime-startTime)
+print("Total time taken:", endTime-startTime)
