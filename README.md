@@ -1,5 +1,5 @@
 # Cern-data-vis
-Collection of data visualisation programs that read data from [cern-acts-traccc](https://github.com/acts-project/traccc) and athena
+Collection of data visualisation programs that read data from [cern-acts-traccc](https://github.com/acts-project/traccc) and athena.
 
 ## Table of Contents
 * [Setup](#Setup)
@@ -20,4 +20,4 @@ Collection of data visualisation programs that read data from [cern-acts-traccc]
 ## Dependencies
 
 ## Licence
-This project uses the MIT license which can be found in the [license](LICENSE) file, read more at [MIT Wikipedia](https://en.wikipedia.org/wiki/MIT_License)
+This project uses the MIT license which can be found in the [license](LICENSE) file, read more at [MIT Wikipedia](https://en.wikipedia.org/wiki/MIT_License).
