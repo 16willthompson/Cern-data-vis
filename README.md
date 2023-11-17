@@ -10,7 +10,11 @@ Collection of data visualisation programs that read data from [cern-acts-traccc]
 * [Licence](#Licence)
 
 ## Setup
-
+To get started, clone this repository by doing:
+'''sh
+git clone https://github.com/16willthompson/Cern-data-vis
+'''
+and thats it, the dependencies are covered in the [Requirements](#Requirements) section.
 ## Requirements
 
 ## Organisation
