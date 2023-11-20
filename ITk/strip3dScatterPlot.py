@@ -77,7 +77,7 @@ if file == 'del': # delete all files in dir with certain file extention
     for filename in glob.glob('./*.png'):
         os.remove(filename)
 else: 
-    file = 'stripDataV1.csv'
+    file = './ITk/stripDataV1.csv'
     dataConf(file)
 
 endTime = time.time()
