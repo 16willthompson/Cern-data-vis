@@ -195,5 +195,5 @@ file = input("Path of file to process: \n")
 if file != "": # calls dataConf with user input string
     dataConf(file)
 else: 
-    file = 'stripDataV1.csv' # change this file to change location of datam make sure heading formatting is correct 
+    file = './ITk/stripDataV1.csv' # change this file to change location of datam make sure heading formatting is correct 
     dataConf(file)

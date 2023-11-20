@@ -94,7 +94,7 @@ if file == 'del': # delete all files in dir with certain file extention
     for filename in glob.glob('./*.png'):
         os.remove(filename)
 else: 
-    file = 'clusterFrequencyevent000000000-cellstml200.csv'
+    file = './Traccc/clusterFrequencyevent000000000-cellstml200.csv'
     dataConf(file)
 
 endTime = time.time()
