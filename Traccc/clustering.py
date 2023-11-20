@@ -104,7 +104,7 @@ file = input("Path of file to process, blank for default or del to delete previo
 startTime = time.time()
 
 if file == "":
-    dataLoad('event000000000-cells.csv')
+    dataLoad('./Traccc/event000000000-cells.csv')
 else: 
     dataLoad(file)
 
