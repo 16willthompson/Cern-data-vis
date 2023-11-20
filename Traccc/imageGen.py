@@ -68,7 +68,7 @@ def toImage(data, geo_id, userInputDict):
 file = input("Path of file to process, blank for default or del to delete previous files*: ")
 startTime = time.time()
 if file == "":
-    dataConf('./event000000000-cellstml200.csv') #default file selection
+    dataConf('./Traccc/event000000000-cellstml200.csv') #default file selection
 elif file == 'del':
     for filename in glob.glob('./*.png'):
         os.remove(filename)

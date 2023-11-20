@@ -1,12 +1,11 @@
 import pandas as pd
 import numpy as np
 import math, time, csv
-from multiprocessing import pool
 
 def dataLoad(fileName):
 
     # geometry_id,hit_id,channel0,channel1,timestamp,value from file './event000000000-cells.csv'
-    data = pd.read_csv(fileName, usecols=['geometry_id','channel0','channel1','value'])
+    data = pd.read_csv( './Traccc/' + fileName, usecols=['geometry_id','channel0','channel1','value'])
 
     #conv to df
     df = pd.DataFrame(data,columns=['geometry_id','channel0','channel1','value'])
@@ -21,7 +20,7 @@ def dataLoad(fileName):
     # clusterData(dataBatch)
 
     # cluster frequency save location
-    clusterQuantitySaveFile = open('clusterFrequency' + fileName, 'w')
+    clusterQuantitySaveFile = open( './Traccc/' + 'clusterFrequency' + fileName, 'w')
     writer = csv.writer(clusterQuantitySaveFile)
     # headers for csv
     writer.writerow(['geometry_id', 'cluster_quantity', 'avg_cluster_ratio', 'cluster_avg_hits'])
@@ -101,10 +100,6 @@ def clusterData(data):
 
 
 file = input("Path of file to process, blank for default or del to delete previous files*: ")
-
-# if __name__ == '__main__':
-#     import timeit
-#     print(timeit.timeit("dataLoad('event000000000-cells.csv')", setup="from __main__ import dataLoad", number=25)/25)
 
 startTime = time.time()
 
