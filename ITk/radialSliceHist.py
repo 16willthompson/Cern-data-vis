@@ -178,7 +178,7 @@ def plot(sliceData, userInputDict):
     # generate colour list for unique events
     number_of_colors = len(uniqueEventIndexList)
     scatterColor = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)])
-            for i in range(number_of_colors)]
+                    for i in range(number_of_colors)]
 
     for index, event in enumerate(uniqueEventIndexList):
         ax.scatter(sliceData.loc[sliceData['eventIndex'] == event, slicePlaneAxis[0]],
