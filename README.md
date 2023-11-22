@@ -27,17 +27,25 @@ Each program varies with ammount of user input requested. Questions are layed ou
 ### Traccc/ 
 #### [clusterFreqImageGen.py](Traccc/clusterFreqImageGen.py)
 This file plots the frequency of clusters made by clustering.py, and also displays the average cluster ratio for each geometryID
+![Used -cells.csv as input](./Sample-Images/clusterFreqImageGenSample.png)
 #### [clustering.py](Traccc/clustering.py)
 This program generates a new csv files containing data used to pass into clusterFreqImageGen.py; the input is simulation data from traccc.
+![Data output from clustering](./Sample-Images/clusteringDataOutputDemo.png)
 #### [imageGen.py](Traccc/imageGen.py)
 This program plots all hits on a scatter graph for a given geometryID, or can cycle through all unique IDs.
+![Used -cells.csv as input](./Sample-Images/geoIDImageGenSample.png)
 ### ITk/ 
 #### [radialSliceHist.py](ITk/radialSliceHist.py)
 This program takes in ethena data and plots them using global xyz coords. A number of views can be display and most of what can be changed in the program is given as options in the CLI.
+![First figure of the program](./Sample-Images/radialSliceHistSampleImg.png)
+![Second figure of the program](./Sample-Images/radialSliceHistEventIndexColouring.png)
 #### [strip3dScatterPlot.py](ITk/strip3dScatterPlot.py)
 this is a simple plot of locations of hits in 3d space with an added line that indicates central beamline.
+![Blueline indicates beamline](./Sample-Images/strip3dScatterPotSample.png)
 #### [stripFreqChart.py](ITk/stripFreqChart.py)
 This is a histogram of phi and eta modules and it can plot the common pairs instead of individual phi and eta.
+![all phi and eta modules, uncombined](./Sample-Images/stripFreqChartUncombined.png)
+![phi and eta for spesific ID](./Sample-Images/stripFreqChartPerID.png)
 
 ## Dependencies
 Project module dependencies are installed in the [Setup](#Setup) section, and was intended to work on Linux distros. Therefore, some module related linker errors may occur if trying to run on Windows or MacOS.
